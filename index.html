@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULTRA SEQUENCER PRO v10 — Perfect Stagger</title>
+
+<style>
+:root{
+  --primary:#0066ff;
+  --bg:#f0f2f5;
+  --card:#ffffff;
+  --text:#1a1d21;
+  --border:#e1e4e8;
+  --accent:#8b5cf6;
+  --danger: #ef4444;
+}
+
+body{
+  margin:0;
+  padding:10px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:16px;
+  margin-bottom:20px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+h2, h3 { margin-top: 0; color: #0f172a; }
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px;
+  margin-bottom: 20px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+label{
+  font-size:13px;
+  font-weight:700;
+  color:#475569;
+}
+
+input,select{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-weight:600;
+  font-size: 14px;
+  background: #fff;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+button{
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 20px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:active { transform: scale(0.98); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.main-btn{background:var(--primary);color:#fff;}
+.reset-btn{background:#fee2e2;color:var(--danger); flex: 0 1 auto; min-width: 120px;}
+.download-btn{background:#16a34a;color:#fff; width: 100%; margin-top: 15px;}
+.toggle-btn{background:#f1f5f9;color:#475569; border: 1px solid var(--border);}
+.toggle-active{background:var(--accent);color:#fff; border-color: var(--accent);}
+
+#previewArea{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:15px;
+  background:#f8fafc;
+  border: 1px dashed var(--border);
+  border-radius:12px;
+  min-height:100px;
+}
+#previewArea img{height:80px; border-radius:8px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+
+#miniProgressWrap{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+.miniBox{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+}
+
+.miniLabel{
+  font-size:12px;
+  margin-bottom:8px;
+  font-weight: 600;
+  color:#64748b;
+  display:flex;
+  justify-content:space-between;
+}
+
+.miniBar{
+  height:8px;
+  background:#f1f5f9;
+  border-radius:10px;
+  overflow:hidden;
+}
+.miniFill{
+  height:100%;
+  width:0%;
+  background:var(--primary);
+  transition: width .2s ease;
+}
+
+#mergeWrap{margin-top:20px; display:none;}
+#mergeBar{
+  height:12px;
+  background:#f1f5f9;
+  border-radius:10px;
+  overflow:hidden;
+}
+#mergeFill{
+  height:100%;
+  width:0%;
+  background:#f59e0b;
+  transition: width .2s ease;
+}
+#mergeText{
+  font-size:14px;
+  font-weight: 600;
+  margin-top:8px;
+  color:#1e293b;
+  text-align: center;
+}
+
+video{
+  width:100%;
+  margin-top:15px;
+  border-radius:12px;
+  background: #000;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; 
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-title { 
+  font-size: 22px; 
+  font-weight: 800; 
+  margin-bottom: 12px; 
+  color: #0f172a; 
+}
+
+.modal-desc { 
+  font-size: 15px; 
+  color: #64748b; 
+  margin-bottom: 24px; 
+  line-height: 1.6;
+}
+
+.modal-btns { 
+  display: flex; 
+  gap: 10px; 
+}
+
+.btn-confirm { background: var(--danger); color: white; flex: 1; }
+.btn-cancel { background: #f1f5f9; color: #475569; flex: 1; }
+
+@media (max-width: 480px) {
+  .modal-btns { flex-direction: column; }
+  .modal-card { padding: 20px; }
+}
+
+@media (max-width: 600px) {
+  .button-group button { flex: 1 1 100%; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-card">
+    <div class="modal-title">Reset Project?</div>
+    <div class="modal-desc">Are You Sure You Want To Clear All Data? This Will Remove Your Uploaded Videos And Current Progress Permanently.</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeResetModal()">Keep Project</button>
+      <button class="btn-confirm" onclick="confirmReset()">Clear Everything</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+<div class="card">
+  <h2>Frame Sequencing Editor</h2>
+  <div class="grid">
+    <div class="field">
+      <label>Max Duration / Clip (Sec)</label>
+      <input type="number" id="duration" value="2" step="0.1">
+    </div>
+    <div class="field">
+      <label>Target FPS</label>
+      <select id="fps">
+        <option>30</option>
+        <option selected>60</option>
+        <option>90</option>
+        <option>120</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>🧩 Step Frame</label>
+      <input type="number" id="stepFrame" value="1" min="1">
+    </div>
+  </div>
+
+  <div class="button-group">
+    <button class="main-btn" onclick="fileIn.click()"> Upload Videos</button>
+    <button class="reset-btn" onclick="openResetModal()">Reset</button>
+  </div>
+  
+  <input type="file" id="fileIn" multiple accept="video/*" hidden>
+  <div id="miniProgressWrap"></div>
+  <div id="mergeWrap">
+    <div id="mergeBar"><div id="mergeFill"></div></div>
+    <div id="mergeText">Merging: 0%</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Sequence Preview</h3>
+  <div id="previewArea"></div>
+  <div class="button-group">
+    <button id="renderBtn" class="main-btn" onclick="renderVideo()" disabled>▶ Start Merge</button>
+    <button id="dupBtn" class="toggle-btn toggle-active" onclick="toggleDup()">Deep Clean Frames: ON</button>
+  </div>
+  <button id="downloadBtn" class="download-btn" style="display:none">Download HQ Video</button>
+</div>
+
+<div id="outputCard" class="card" style="display:none">
+  <h3> Final Output</h3>
+  <video id="finalVideo" controls></video>
+</div>
+</div>
+
+<canvas id="engineCanvas" style="display:none"></canvas>
+
+<script>
+let clipBuffers=[];
+let frameQueue=[];
+let processing=false;
+let finalBlob=null;
+let removeDups = true;
+
+const STORAGE_KEY="ULTRA_SEQ_PROJECT_V1";
+const fileIn=document.getElementById('fileIn');
+const canvas=document.getElementById('engineCanvas');
+const ctx=canvas.getContext('2d',{alpha:false,willReadFrequently:true});
+const previewArea=document.getElementById('previewArea');
+const renderBtn=document.getElementById('renderBtn');
+const dupBtn=document.getElementById('dupBtn');
+const fpsSel=document.getElementById('fps');
+const durIn=document.getElementById('duration');
+const stepInput=document.getElementById('stepFrame');
+const miniWrap=document.getElementById('miniProgressWrap');
+const finalVideo=document.getElementById('finalVideo');
+const outputCard=document.getElementById('outputCard');
+const downloadBtn=document.getElementById('downloadBtn');
+const mergeWrap=document.getElementById('mergeWrap');
+const mergeFill=document.getElementById('mergeFill');
+const mergeText=document.getElementById('mergeText');
+const resetModal=document.getElementById('resetModal');
+
+function openResetModal(){ resetModal.classList.add('active'); }
+function closeResetModal(){ resetModal.classList.remove('active'); }
+function confirmReset(){ localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+function toggleDup(){
+  removeDups=!removeDups;
+  dupBtn.textContent=`Deep Clean Frames: ${removeDups?'ON':'OFF'}`;
+  dupBtn.classList.toggle('toggle-active',removeDups);
+}
+
+function saveProject(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      clipBuffers,frameQueue,fps:fpsSel.value,
+      duration:durIn.value,removeDups,step:stepInput.value
+    }));
+  }catch(e){}
+}
+
+function loadProject(){
+  try{
+    const data=localStorage.getItem(STORAGE_KEY);
+    if(!data) return;
+    const p=JSON.parse(data);
+    clipBuffers=p.clipBuffers||[];
+    frameQueue=p.frameQueue||[];
+    fpsSel.value=p.fps||fpsSel.value;
+    durIn.value=p.duration||durIn.value;
+    if(p.step) stepInput.value=p.step;
+    if(p.removeDups === false) toggleDup(); 
+    if(frameQueue.length){
+      rebuildPreview();
+      renderBtn.disabled=false;
+    }
+  }catch(e){}
+}
+
+stepInput.addEventListener('change',()=>{
+  if(clipBuffers.length){
+    buildSequence();
+    saveProject();
+  }
+});
+
+fileIn.onchange=async()=>{
+  if(processing) return;
+  const files=[...fileIn.files];
+  if(!files.length) return;
+  processing=true;
+  clipBuffers=[];
+  miniWrap.innerHTML="";
+  renderBtn.disabled=true;
+  downloadBtn.style.display='none';
+
+  const bars=files.map((f,i)=>{
+    const box=document.createElement('div');
+    box.className='miniBox';
+    box.innerHTML=`<div class="miniLabel"><span>Clip ${i+1}</span><span class="pct">0%</span></div><div class="miniBar"><div class="miniFill"></div></div>`;
+    miniWrap.appendChild(box);
+    return {fill:box.querySelector('.miniFill'),pct:box.querySelector('.pct')};
+  });
+
+  await Promise.all(files.map((file,i)=>extractFramesPerfect(file,i,bars[i])));
+  buildSequence();
+  saveProject();
+  renderBtn.disabled=false;
+  processing=false;
+};
+
+async function extractFramesPerfect(file,index,barObj){
+  const video=document.createElement('video');
+  video.muted=true; video.playsInline=true; video.preload='auto';
+  video.src=URL.createObjectURL(file);
+  await waitEvent(video,'loadedmetadata');
+
+  const fps=parseInt(fpsSel.value);
+  const maxUse=Math.min(video.duration,parseFloat(durIn.value));
+  const totalFrames=Math.floor(maxUse*fps);
+
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+
+  const frames=[];
+  for(let i=0;i<totalFrames;i++){
+    const t=(i+0.0001)/fps;
+    await seekExact(video,t);
+    ctx.drawImage(video,0,0);
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',0.90));
+    frames.push(URL.createObjectURL(blob));
+
+    const pct=((i+1)/totalFrames)*100;
+    barObj.fill.style.width=pct+"%";
+    barObj.pct.textContent=Math.floor(pct)+"%";
+
+    if(i%2===0) await new Promise(r=>setTimeout(r,0));
+  }
+  clipBuffers[index]=frames;
+}
+
+function waitEvent(el,name){ return new Promise(r=>el.addEventListener(name,r,{once:true})); }
+function seekExact(video,time){
+  return new Promise(res=>{
+    const done=()=>{ video.removeEventListener('seeked',done); requestAnimationFrame(()=>res()); };
+    video.addEventListener('seeked',done);
+    video.currentTime=Math.min(time,video.duration-0.001);
+  });
+}
+
+function buildSequence(){
+  const numClips = clipBuffers.length;
+  frameQueue = [];
+  if(!numClips) return;
+
+  const stepVal = Math.max(1, parseInt(stepInput.value) || 1);
+  const maxLen = Math.max(...clipBuffers.map(c => c.length));
+
+  for(let i = 0; i < maxLen; i += stepVal){
+    const clipIndex = Math.floor(i / stepVal) % numClips;
+    const clip = clipBuffers[clipIndex];
+    if(clip[i]) frameQueue.push(clip[i]);
+  }
+
+  rebuildPreview();
+}
+
+function rebuildPreview(){
+  previewArea.innerHTML="";
+  frameQueue.slice(0,60).forEach(src=>{
+    const img=new Image(); img.src=src; previewArea.appendChild(img);
+  });
+}
+
+async function renderVideo(){
+  if(!frameQueue.length) return;
+
+  const fpsVal=parseInt(fpsSel.value);
+  const frameDuration=1000/fpsVal;
+
+  mergeWrap.style.display='block';
+  mergeFill.style.width='0%';
+  mergeText.textContent='Initializing Deep Clean...';
+
+  const firstImg=await loadImg(frameQueue[0]);
+  canvas.width=firstImg.width;
+  canvas.height=firstImg.height;
+
+  const stream=canvas.captureStream(fpsVal);
+  const track=stream.getVideoTracks()[0];
+
+  const recorder=new MediaRecorder(stream,{
+    mimeType:'video/webm;codecs=vp9',
+    videoBitsPerSecond:80000000
+  });
+
+  const chunks=[];
+  recorder.ondataavailable=e=>chunks.push(e.data);
+  recorder.onstop=()=>{
+    finalBlob=new Blob(chunks,{type:'video/webm'});
+    finalVideo.src=URL.createObjectURL(finalBlob);
+    outputCard.style.display='block';
+    downloadBtn.style.display='block';
+    mergeText.textContent=' Merge Complete';
+    saveProject();
+  };
+
+  recorder.start();
+
+  let lastFrameData = null;
+  const total = frameQueue.length;
+  let nextFrameTime = performance.now();
+
+  for(let i=0; i<total; i++){
+    const img = await loadImg(frameQueue[i]);
+    ctx.drawImage(img, 0, 0);
+
+    let isBad = false;
+    if(removeDups){
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      if(lastFrameData && isDeepMatch(lastFrameData, imgData)) isBad = true;
+      else if (isGlitchFrame(imgData)) isBad = true;
+      if(!isBad) lastFrameData = imgData;
+    }
+
+    if(!isBad){
+      track.requestFrame();
+    } else if(lastFrameData){
+      const lastImg = new ImageData(lastFrameData, canvas.width, canvas.height);
+      ctx.putImageData(lastImg, 0, 0);
+      track.requestFrame();
+    }
+
+    const pct = ((i+1)/total)*100;
+    mergeFill.style.width = pct+"%";
+    mergeText.textContent = `Processing Frame ${i+1}/${total} (${Math.floor(pct)}%)`;
+
+    nextFrameTime += frameDuration;
+    const delay = nextFrameTime - performance.now();
+    if(delay > 0) await new Promise(r => setTimeout(r, delay));
+    else nextFrameTime = performance.now();
+  }
+
+  setTimeout(()=>recorder.stop(), 500);
+}
+
+function isDeepMatch(d1, d2){
+  let diff = 0;
+  for(let i=0; i<d1.length; i+=1000){
+    if(Math.abs(d1[i] - d2[i]) > 8) diff++;
+    if(diff > 5) return false; 
+  }
+  return true;
+}
+
+function isGlitchFrame(data) {
+  let brightness = 0;
+  for (let i = 0; i < data.length; i += 2000) {
+    brightness += (data[i] + data[i+1] + data[i+2]) / 3;
+  }
+  const avg = brightness / (data.length / 2000);
+  return avg < 2;
+}
+
+function loadImg(src){ return new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.src=src; }); }
+
+downloadBtn.onclick=()=>{
+  if(!finalBlob) return;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(finalBlob);
+  a.download='ultra_sequence_perfect.webm';
+  a.click();
+};
+
+loadProject();
+</script>
+</body>
+</html>
